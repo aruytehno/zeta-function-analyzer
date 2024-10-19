@@ -31,23 +31,19 @@ def plot_spiral_primes(limit, point_size, color):
     ax.tick_params(axis='x', colors='white')
     ax.tick_params(axis='y', colors='white')
 
-    return fig
+    return fig, ax
 
 
-# Визуализация: Полярное распределение простых чисел
-def plot_polar_primes(limit, point_size, color):
-    primes = sieve_of_eratosthenes(limit)
+# Визуализация: Спираль золотого сечения (спираль Фибоначчи) на распределении простых чисел
+def add_golden_spiral(ax, limit, point_size, color):
+    phi = (1 + np.sqrt(5)) / 2  # Золотое сечение
+    theta = np.linspace(0, 4 * np.pi, limit)  # Угловая координата
+    r = phi ** theta  # Радиальная координата
 
-    theta = primes % (2 * np.pi)
-    r = np.sqrt(primes)
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
 
-    fig = plt.figure(figsize=(10, 10), facecolor='black')
-    ax = fig.add_subplot(111, projection='polar')
-    ax.scatter(theta, r, s=point_size, c=color, alpha=0.75)
-    ax.set_facecolor('black')
-    ax.set_title(f"Polar Prime Distribution (up to {limit})", color='white')
-
-    return fig
+    ax.scatter(x, y, s=point_size, c=color, alpha=0.75, label="Golden Spiral")
 
 
 # Интерфейс Streamlit
@@ -57,17 +53,22 @@ st.title("Визуализация простых чисел")
 limit = st.slider('Предел для поиска простых чисел', min_value=1000, max_value=1000000, value=100000, step=1000)
 point_size = st.slider('Размер точек', min_value=1, max_value=20, value=5)
 
-# Выбор типа визуализации
-plot_type = st.selectbox("Выберите тип визуализации", ["Прямоугольная спираль", "Полярная визуализация"])
+# Выбор цвета для точек распределения простых чисел
+prime_color = st.color_picker('Цвет точек для простых чисел', '#FF0000')
 
-# Выбор цвета точек
-color = st.color_picker('Выберите цвет точек', '#FF0000')
+# Флажок для включения/отключения спирали золотого сечения
+show_golden_spiral = st.checkbox('Отобразить спираль золотого сечения')
 
-# Построение графика на основе выбора
-if plot_type == "Прямоугольная спираль":
-    fig = plot_spiral_primes(limit, point_size, color)
-else:
-    fig = plot_polar_primes(limit, point_size, color)
+# Если отображение спирали включено, то также появляется выбор цвета
+if show_golden_spiral:
+    spiral_color = st.color_picker('Цвет точек для спирали золотого сечения', '#00FF00')
+
+# Построение графика
+fig, ax = plot_spiral_primes(limit, point_size, prime_color)
+
+# Добавление спирали золотого сечения, если выбрано
+if show_golden_spiral:
+    add_golden_spiral(ax, limit, point_size, spiral_color)
 
 # Отображение графика
 st.pyplot(fig)
